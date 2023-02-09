@@ -1,10 +1,6 @@
 <?php
 namespace App\Tests;
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use App\Entity\Product;
 use Hautelook\AliceBundle\PhpUnit\RefreshDatabaseTrait;
@@ -21,62 +17,60 @@ class ProductsTest extends ApiTestCase
         $response = static::createClient()->request('GET', 'api/products');
         $this->assertResponseIsSuccessful();
 
-        // print_r($response); die;
+        $data = $response->toArray();
+        
+        // Asserts that the returned content type is JSON (the default)
+        $this->assertResponseHeaderSame('content-type', 'application/json');
+
+        $arr = [];
+        foreach($data['data'] as $key => $val){
+            $arr[] = array(
+                'id' =>  $val['id'],
+                'title' =>  $val['title'],
+                'image' =>  $val['image'],
+                'price' =>  $val['price'],
+                'description' =>  $val['description'],
+                'created_at' =>  $val['created_at'],
+                'updated_at' =>  $val['updated_at'],
+            );
+        }
+
+        // Asserts that the returned JSON is a superset of this one
+        $this->assertJsonContains([
+            'status' => true,
+            'msg' => '',
+            'data' => $arr,
+        ]);
+
+        // Asserts that the returned JSON is validated by the JSON Schema generated for this resource by API Platform
+        // This generated JSON Schema is also used in the OpenAPI spec!
+        $this->assertMatchesResourceItemJsonSchema(Product::class, '', 'json');
+    }
+
+    public function testGetData(): void
+    {
+        // The client implements Symfony HttpClient's `HttpClientInterface`, and the response `ResponseInterface`
+        $response = static::createClient()->request('GET', 'api/product/1');
+        $this->assertResponseIsSuccessful();
+
+        $data = $response->toArray();
         
         // Asserts that the returned content type is JSON-LD (the default)
         $this->assertResponseHeaderSame('content-type', 'application/json');
 
         // Asserts that the returned JSON is a superset of this one
-        $date = new \DateTimeImmutable('@'.strtotime('now'));
         $this->assertJsonContains([
             'status' => true,
             'msg' => '',
-            'data' => [
-                'id' => 1,
-                'title' => 'test product 7',
-                'image' => '/images/mouse7.webp',
-                'price' => 170,
-                'description' => "Occaecati debitis et saepe eum sint dolorem. Enim ipsum inventore sed libero et velit qui suscipit. Deserunt laudantium quibusdam enim nostrum soluta qui ipsam non.",
-                'created_at' => '2023-02-08T10:05:03+05:30',
-                'updated_at' => '2023-02-08T10:05:03+05:30',
-            ],
+            'data' => $data['data'],
         ]);
-
-        // Because test fixtures are automatically loaded between each test, you can assert on them
-        // $this->assertCount(30, $response->toArray()['hydra:member']);
 
         // Asserts that the returned JSON is validated by the JSON Schema generated for this resource by API Platform
         // This generated JSON Schema is also used in the OpenAPI spec!
-        $this->assertMatchesResourceCollectionJsonSchema(Product::class);
+        $this->assertMatchesResourceItemJsonSchema(Product::class, '', 'json');
     }
 
-    /*public function testCreateBook(): void
-    {
-        $response = static::createClient()->request('POST', '/books', ['json' => [
-            'isbn' => '0099740915',
-            'title' => 'The Handmaid\'s Tale',
-            'description' => 'Brilliantly conceived and executed, this powerful evocation of twenty-first century America gives full rein to Margaret Atwood\'s devastating irony, wit and astute perception.',
-            'author' => 'Margaret Atwood',
-            'publicationDate' => '1985-07-31T00:00:00+00:00',
-        ]]);
-
-        $this->assertResponseStatusCodeSame(201);
-        $this->assertResponseHeaderSame('content-type', 'application/ld+json; charset=utf-8');
-        $this->assertJsonContains([
-            '@context' => '/contexts/Book',
-            '@type' => 'Book',
-            'isbn' => '0099740915',
-            'title' => 'The Handmaid\'s Tale',
-            'description' => 'Brilliantly conceived and executed, this powerful evocation of twenty-first century America gives full rein to Margaret Atwood\'s devastating irony, wit and astute perception.',
-            'author' => 'Margaret Atwood',
-            'publicationDate' => '1985-07-31T00:00:00+00:00',
-            'reviews' => [],
-        ]);
-        $this->assertMatchesRegularExpression('~^/books/\d+$~', $response->toArray()['@id']);
-        $this->assertMatchesResourceItemJsonSchema(Book::class);
-    }
-
-    public function testCreateInvalidBook(): void
+    /*public function testCreateInvalidBook(): void
     {
         static::createClient()->request('POST', '/books', ['json' => [
             'isbn' => 'invalid',

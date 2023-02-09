@@ -56,6 +56,13 @@ class Cart
     #[ORM\Column]
     private ?\DateTimeImmutable $updated_at = null;
 
+    public function __construct()
+    {
+        $date = new \DateTimeImmutable('@'.strtotime('now'));
+        $this->created_at =  $date;
+        $this->updated_at =  $date;
+    }
+
     public function getId(): ?int
     {
         return $this->id;

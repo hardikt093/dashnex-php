@@ -2,7 +2,7 @@
 fos_rest:
     format_listener:
         rules:
-            - { path: ^/api, prefer_extension: true, fallback_format: json, priorities: [ json, html ] }
+            - { path: ^/api, prefer_extension: true, fallback_format: jsonld, priorities: [ jsonld, json, html ] }
 #fos_rest:
 #    param_fetcher_listener:  true
 #    allowed_methods_listener:  true
