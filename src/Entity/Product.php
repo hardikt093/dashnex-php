@@ -22,19 +22,19 @@ use ApiPlatform\Metadata\Delete;
         name: 'product/{id}',
         routeName:'api_show_product'
     ),
-    new Post(
-        name: 'product',
-        routeName:'api_new_product',
-        controller: ProductController::class
-    ),
-    new Put(
-        name: 'product',
-        routeName:'api_edit_product',
-    ),
-    new Delete(
-        name: 'product',
-        routeName:'api_delete_product',
-    )
+    // new Post(
+    //     name: 'product',
+    //     routeName:'api_new_product',
+    //     controller: ProductController::class
+    // ),
+    // new Put(
+    //     name: 'product',
+    //     routeName:'api_edit_product',
+    // ),
+    // new Delete(
+    //     name: 'product',
+    //     routeName:'api_delete_product',
+    // )
 ])]
 
 class Product
